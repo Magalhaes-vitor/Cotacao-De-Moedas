@@ -24,7 +24,7 @@ Este projeto é um script em Python que automatiza o processo de coleta, process
 Clone este repositório e instale os requisitos listados no arquivo `requirements.txt`:
 
 ```bash
-git clone https://github.com/Magalhaes-vitor/Monitoramento-Dados-Financeiros.git
+git clone https://github.com/Magalhaes-vitor/Cotacao-De-Moedas.git
 cd repositorio
 pip install -r requirements.txt
 ```
