@@ -40,7 +40,7 @@ Para executar o script e visualizar o dashboard, siga os seguintes passos:
 3. Execute o script:
 
 ```bash
-python script_cotacoes.py
+python cotação_moedas.py
 ```
 
 O dashboard estará disponível em `http://127.0.0.1:8050/` e mostrará as cotações das moedas coletadas.
