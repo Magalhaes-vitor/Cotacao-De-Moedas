@@ -1,4 +1,4 @@
-###### ideia inicail:
+##### ideia inicail:
 
 Projeto: Plataforma de Automação para Monitoramento e Processamento de Dados Financeiros
 
