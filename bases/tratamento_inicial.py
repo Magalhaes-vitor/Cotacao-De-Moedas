@@ -31,6 +31,23 @@ def download_csv(date):
         logging.error(f"Erro ao processar dados para a data {date}: {e}")
         return None
 
+# Função para calcular os valores em US$ e R$
+def calculate_values(df):
+    df['Valor em US$'] = 0
+    df['Valor em R$'] = 0
+
+    # Para Moedas do Tipo A
+    df_a = df[df['Tipo'] == 'A'].copy()
+    df.loc[df['Tipo'] == 'A', 'Valor em US$'] = df_a['Taxa Compra'] / df_a['Paridade Compra']
+    df.loc[df['Tipo'] == 'A', 'Valor em R$'] = df_a['Taxa Compra'] * df_a['Taxa Venda']
+
+    # Para Moedas do Tipo B
+    df_b = df[df['Tipo'] == 'B'].copy()
+    df.loc[df['Tipo'] == 'B', 'Valor em US$'] = df_b['Taxa Compra'] * df_b['Paridade Compra']
+    df.loc[df['Tipo'] == 'B', 'Valor em R$'] = df_b['Taxa Compra'] * df_b['Taxa Venda']
+
+    return df
+
 # Função para salvar os dados em um único arquivo Excel
 def save_to_excel(dataframes, filename):
     with pd.ExcelWriter(filename, engine='xlsxwriter') as writer:
@@ -41,28 +58,30 @@ def save_to_excel(dataframes, filename):
 
         for date, df in dataframes.items():
             if df is not None and not df.empty:
-                expected_columns = ['Data','Cod Moeda', 'Tipo', 'Moeda', 'Taxa Compra', 'Taxa Venda', 'Paridade Compra', 'Paridade Venda']
-
+                expected_columns = ['Data', 'Cod Moeda', 'Tipo', 'Moeda', 'Taxa Compra', 'Taxa Venda', 'Paridade Compra', 'Paridade Venda']
                 if len(df.columns) == len(expected_columns):
                     df.columns = expected_columns
                 else:
                     logging.warning(f"Número de colunas não corresponde para a data {date}. Esperado: {len(expected_columns)}, encontrado: {len(df.columns)}.")
                     continue  # Ignora esta data
 
+                df = calculate_values(df)
+
+                # Ordena pelo código da moeda
+                df = df.sort_values(by='Cod Moeda')
+
                 # Escreve o DataFrame na planilha
                 df.to_excel(writer, sheet_name=date.replace('-', ''), index=False, header=False)
-
-                # Obter o número de linhas do DataFrame
-                num_rows = df.shape[0]
 
                 # Adiciona cabeçalho
                 worksheet = writer.sheets[date.replace('-', '')]
                 worksheet.write_row(0, 0, df.columns, format_header)
 
-                # Aplica a formatação nas linhas até a 8ª coluna (colunas 0 a 7)
+                # Aplica a formatação nas linhas
+                num_rows = df.shape[0]
                 for i in range(num_rows):
                     row_format = format_row1 if i % 2 == 0 else format_row2
-                    for col in range(8):  # Aplica até a 8ª coluna
+                    for col in range(len(df.columns)):
                         worksheet.write(i + 1, col, df.iloc[i, col], row_format)
 
                 logging.info(f"Dados salvos para a data: {date}")
